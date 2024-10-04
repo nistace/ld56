@@ -1,0 +1,3 @@
+[submodule "Assets/NiUtils"]
+	path = Assets/NiUtils
+	url = https://github.com/nistace/unityutils.git
