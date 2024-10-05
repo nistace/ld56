@@ -109,6 +109,15 @@ namespace LD56
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Restart"",
+                    ""type"": ""Button"",
+                    ""id"": ""fdd08167-735e-4e2d-9ec9-f476235e355f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -309,6 +318,17 @@ namespace LD56
                     ""action"": ""SelectCharacter4"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b7cb8136-7a1d-4fd5-9647-8472d8ac0c94"",
+                    ""path"": ""<Keyboard>/backspace"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Restart"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -326,6 +346,7 @@ namespace LD56
             m_Player_SelectCharacter2 = m_Player.FindAction("SelectCharacter2", throwIfNotFound: true);
             m_Player_SelectCharacter3 = m_Player.FindAction("SelectCharacter3", throwIfNotFound: true);
             m_Player_SelectCharacter4 = m_Player.FindAction("SelectCharacter4", throwIfNotFound: true);
+            m_Player_Restart = m_Player.FindAction("Restart", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -396,6 +417,7 @@ namespace LD56
         private readonly InputAction m_Player_SelectCharacter2;
         private readonly InputAction m_Player_SelectCharacter3;
         private readonly InputAction m_Player_SelectCharacter4;
+        private readonly InputAction m_Player_Restart;
         public struct PlayerActions
         {
             private @Controls m_Wrapper;
@@ -409,6 +431,7 @@ namespace LD56
             public InputAction @SelectCharacter2 => m_Wrapper.m_Player_SelectCharacter2;
             public InputAction @SelectCharacter3 => m_Wrapper.m_Player_SelectCharacter3;
             public InputAction @SelectCharacter4 => m_Wrapper.m_Player_SelectCharacter4;
+            public InputAction @Restart => m_Wrapper.m_Player_Restart;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -445,6 +468,9 @@ namespace LD56
                 @SelectCharacter4.started += instance.OnSelectCharacter4;
                 @SelectCharacter4.performed += instance.OnSelectCharacter4;
                 @SelectCharacter4.canceled += instance.OnSelectCharacter4;
+                @Restart.started += instance.OnRestart;
+                @Restart.performed += instance.OnRestart;
+                @Restart.canceled += instance.OnRestart;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -476,6 +502,9 @@ namespace LD56
                 @SelectCharacter4.started -= instance.OnSelectCharacter4;
                 @SelectCharacter4.performed -= instance.OnSelectCharacter4;
                 @SelectCharacter4.canceled -= instance.OnSelectCharacter4;
+                @Restart.started -= instance.OnRestart;
+                @Restart.performed -= instance.OnRestart;
+                @Restart.canceled -= instance.OnRestart;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -504,6 +533,7 @@ namespace LD56
             void OnSelectCharacter2(InputAction.CallbackContext context);
             void OnSelectCharacter3(InputAction.CallbackContext context);
             void OnSelectCharacter4(InputAction.CallbackContext context);
+            void OnRestart(InputAction.CallbackContext context);
         }
     }
 }

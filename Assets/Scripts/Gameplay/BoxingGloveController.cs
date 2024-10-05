@@ -1,7 +1,6 @@
 using LD56;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 public class BoxingGloveController : MonoBehaviour, IActionPerformer
 {
@@ -23,7 +22,7 @@ public class BoxingGloveController : MonoBehaviour, IActionPerformer
         if (Physics.Raycast(new Ray(hitOriginPoint.position, hitOriginPoint.forward * hitDistance), out var hitInfo, hitDistance, hitMask))
         {
             var target = hitInfo.collider.GetComponentInParent<IHittable>();
-            target?.Hit(force * hitOriginPoint.forward, 2);
+            target?.Hit(new HitData(hitInfo.point, force * hitOriginPoint.forward, 2));
             hit = target != null;
         }
 

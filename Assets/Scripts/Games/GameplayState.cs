@@ -30,7 +30,7 @@ namespace LD56
         private void ChangeCreatureControl(int index)
         {
             CurrentCreature.SetCreatureAsActive(false);
-            CurrentCreatureIndex = index.PosMod(GameData.Data.PlayerCreatures.Length);
+            CurrentCreatureIndex = index.PosMod(GameData.Data.PlayerCreatures.Count);
             CurrentCreature.SetCreatureAsActive(true);
             GameData.Data.Camera.Target = CurrentCreature;
         }
@@ -41,6 +41,7 @@ namespace LD56
         public void Enable()
         {
             ChangeCreatureControl(0);
+            GameData.Data.Camera.SnapToTarget();
             SetListenersEnabled(true);
         }
 

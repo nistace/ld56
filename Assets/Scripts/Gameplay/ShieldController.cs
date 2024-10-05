@@ -14,7 +14,7 @@ namespace LD56 {
 
 		private float NextUsageMinTime { get; set; }
 		public float HitForceRatio => hitForceRatio;
-		public UnityEvent<Vector3, float> OnHit { get; } = new UnityEvent<Vector3, float>();
+		public UnityEvent<HitData> OnHit { get; } = new UnityEvent<HitData>();
 
 		public UnityEvent<PerformAction> OnActionTriggered { get; } = new UnityEvent<PerformAction>();
 
@@ -28,6 +28,6 @@ namespace LD56 {
 			return true;
 		}
 
-		public void Hit(Vector3 force, float kinematicForbiddenUntilTime) => OnHit.Invoke(force, kinematicForbiddenUntilTime);
+		public void Hit(HitData hitData) => OnHit.Invoke(hitData);
 	}
 }

@@ -36,11 +36,12 @@ namespace LD56
         {
             get
             {
-                if (Mathf.Abs(ArmToAimTarget.x) < cameraTargetPositionDistanceThreshold) return transform.position.With(y: 0);
-                return transform.position.With(y: 0) + (ArmToAimTarget.x < 0 ? Vector3.left : Vector3.right) * cameraTargetPositionDistance;
+                if (Mathf.Abs(ArmToAimTarget.x) < cameraTargetPositionDistanceThreshold) return transform.position.With(y: LatestYOnGround);
+                return transform.position.With(y: LatestYOnGround) + (ArmToAimTarget.x < 0 ? Vector3.left : Vector3.right) * cameraTargetPositionDistance;
             }
         }
 
+        private float LatestYOnGround { get; set; }
         private bool IsActiveCreature { get; set; }
         public bool IsOnGround => groundChecker.IsOnGround;
         public Vector3 Velocity => rigidbody.velocity;
@@ -57,6 +58,7 @@ namespace LD56
                 shieldController.OnHit.AddListenerOnce(HandleShieldHit);
             }
             CurrentSelfRotationY = Vector3.SignedAngle(selfTransform.forward, Vector3.right, Vector3.up);
+            LatestYOnGround = transform.position.y;
         }
 
         private void OnDestroy()
@@ -80,6 +82,8 @@ namespace LD56
 
             UpdateMovement();
             UpdateAim();
+
+            if (IsOnGround) LatestYOnGround = transform.position.y;
         }
 
         private void UpdateAim()
@@ -153,20 +157,20 @@ namespace LD56
             IsActiveCreature = active;
         }
 
-        public void Hit(Vector3 force, float kinematicForbiddenUntilTime)
+        public void Hit(HitData hitData)
         {
             healthController.Damage();
             rigidbody.isKinematic = false;
-            rigidbody.AddForce(force);
-            KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + kinematicForbiddenUntilTime);
+            rigidbody.AddForce(hitData.Force);
+            KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + hitData.KinematicAllowedInTime);
         }
 
-        private void HandleShieldHit(Vector3 force, float kinematicForbiddenUntilTime)
+        private void HandleShieldHit(HitData hitData)
         {
             if (ActionPerformer is not ShieldController shieldController) return;
             rigidbody.isKinematic = false;
-            rigidbody.AddForce(force * shieldController.HitForceRatio);
-            KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + kinematicForbiddenUntilTime * shieldController.HitForceRatio);
+            rigidbody.AddForce(hitData.Force * shieldController.HitForceRatio);
+            KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + hitData.KinematicAllowedInTime * shieldController.HitForceRatio);
         }
     }
 }
