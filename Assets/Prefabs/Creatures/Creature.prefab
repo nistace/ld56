@@ -301,12 +301,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d8db0622aaf3c84cb2b45aa326c59d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healthController: {fileID: 8874897034967771277}
   selfTransform: {fileID: 1735131111583469691}
   selfRotationSpeed: 720
   bodyMid: {fileID: 8124844118555039434}
   rigidbody: {fileID: 7589857367305966729}
   groundChecker: {fileID: 1142482800875612281}
   arm: {fileID: 7589857369003853079}
+  hasArmMovement: 1
   armAimMovementSlerpFactor: 8
   minAimTargetDistanceFromArm: 10
   movementSpeed: 8

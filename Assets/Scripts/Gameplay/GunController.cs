@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using NiUtils.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace LD56 {
 	public class GunController : MonoBehaviour, IActionPerformer {
@@ -11,10 +10,10 @@ namespace LD56 {
 		[SerializeField] protected int maxAmmunition = 10;
 		[SerializeField] protected int ammo = 10;
 		[SerializeField] protected float cooldown = .1f;
-		[FormerlySerializedAs("redDotOrigin")] [SerializeField] protected Transform shotOrigin;
+		[SerializeField] protected Transform shotOrigin;
 		[SerializeField] protected Transform redDot;
 		[SerializeField] protected float range = 50;
-		[FormerlySerializedAs("mask")] [FormerlySerializedAs("redDotCastMask")] [SerializeField] protected LayerMask hitMask;
+		[SerializeField] protected LayerMask hitMask;
 
 		private static Collider[] CastNonAllocArray { get; } = Array.Empty<Collider>();
 

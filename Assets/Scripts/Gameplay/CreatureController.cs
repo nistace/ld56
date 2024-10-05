@@ -1,17 +1,18 @@
 using NiUtils.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 using Quaternion = UnityEngine.Quaternion;
 
 namespace LD56 {
-	public class CreatureController : MonoBehaviour, ICameraTarget, IPropelable {
+	public class CreatureController : MonoBehaviour, ICameraTarget, IPropelable, IHittable {
+		[SerializeField] protected HealthController healthController;
 		[SerializeField] protected Transform selfTransform;
 		[SerializeField] protected float selfRotationSpeed = 8f;
 		[SerializeField] protected Transform bodyMid;
 		[SerializeField] protected new Rigidbody rigidbody;
 		[SerializeField] protected GroundChecker groundChecker;
-		[FormerlySerializedAs("armAimTarget")] [SerializeField] protected Transform arm;
+		[SerializeField] protected Transform arm;
+		[SerializeField] protected bool hasArmMovement = true;
 		[SerializeField] protected float armAimMovementSlerpFactor = 8f;
 		[SerializeField] protected float minAimTargetDistanceFromArm = 3;
 		[SerializeField] protected float movementSpeed = .3f;
@@ -45,11 +46,17 @@ namespace LD56 {
 		private void Start() {
 			ActionPerformer = arm.GetComponentInChildren<IActionPerformer>();
 			ActionPerformer?.OnActionTriggered.AddListenerOnce(OnActionPerformed.Invoke);
+			if (ActionPerformer is ShieldController shieldController) {
+				shieldController.OnHit.AddListenerOnce(HandleShieldHit);
+			}
 			CurrentSelfRotationY = Vector3.SignedAngle(selfTransform.forward, Vector3.right, Vector3.up);
 		}
 
 		private void OnDestroy() {
 			ActionPerformer?.OnActionTriggered.RemoveListener(OnActionPerformed.Invoke);
+			if (ActionPerformer is ShieldController shieldController) {
+				shieldController.OnHit.RemoveListener(HandleShieldHit);
+			}
 		}
 
 		public void Move(Vector2 input) {
@@ -82,8 +89,10 @@ namespace LD56 {
 
 			CurrentSelfRotationY = Mathf.MoveTowards(CurrentSelfRotationY, TargetSelfRotationY, selfRotationSpeed * Time.deltaTime);
 			selfTransform.rotation = Quaternion.Euler(0, CurrentSelfRotationY, 0);
+		}
 
-			if (ArmMovementAllowed && Mathf.Approximately(CurrentSelfRotationY, TargetSelfRotationY)) {
+		private void LateUpdate() {
+			if (hasArmMovement && ArmMovementAllowed && Mathf.Approximately(CurrentSelfRotationY, TargetSelfRotationY)) {
 				var upVector = Vector3.Cross(Vector3.forward, ArmToAimTarget);
 				if (Vector3.Angle(upVector, Vector3.up) > 90) upVector = -upVector;
 
@@ -117,11 +126,25 @@ namespace LD56 {
 		public void Propel(Vector3 force, float kinematicForbiddenUntilTime) {
 			rigidbody.isKinematic = false;
 			rigidbody.AddForce(force);
-			KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, kinematicForbiddenUntilTime);
+			KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + kinematicForbiddenUntilTime);
 		}
 
 		public void SetCreatureAsActive(bool active) {
 			IsActiveCreature = active;
+		}
+
+		public void Hit(Vector3 force, float kinematicForbiddenUntilTime) {
+			healthController.Damage();
+			rigidbody.isKinematic = false;
+			rigidbody.AddForce(force);
+			KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + kinematicForbiddenUntilTime);
+		}
+
+		private void HandleShieldHit(Vector3 force, float kinematicForbiddenUntilTime) {
+			if (ActionPerformer is not ShieldController shieldController) return;
+			rigidbody.isKinematic = false;
+			rigidbody.AddForce(force * shieldController.HitForceRatio);
+			KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, Time.time + kinematicForbiddenUntilTime * shieldController.HitForceRatio);
 		}
 	}
 }
