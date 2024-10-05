@@ -1,39 +1,41 @@
 using LD56;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
-public class BoxingGloveController : MonoBehaviour, IActionPerformer {
-	[SerializeField] protected PerformAction hitAction;
-	[SerializeField] protected float force = 2000;
-	[SerializeField] protected float cooldown = .2f;
-	[SerializeField] protected Transform hitPosition;
-	[SerializeField] protected float hitRadius = .2f;
-	[SerializeField] protected LayerMask hitMask;
+public class BoxingGloveController : MonoBehaviour, IActionPerformer
+{
+    [SerializeField] protected PerformAction hitAction;
+    [SerializeField] protected float force = 2000;
+    [SerializeField] protected float cooldown = .2f;
+    [SerializeField] protected Transform hitOriginPoint;
+    [SerializeField] protected float hitDistance = .2f;
+    [SerializeField] protected LayerMask hitMask;
 
-	private float NextShotAllowedTime { get; set; }
-	public UnityEvent<PerformAction> OnActionTriggered { get; } = new UnityEvent<PerformAction>();
+    private float NextHitAllowedTime { get; set; }
+    public UnityEvent<PerformAction> OnActionTriggered { get; } = new UnityEvent<PerformAction>();
 
-	private Collider[] HitColliderNonAlloc { get; } = new Collider[3];
+    public bool TryPerformAction()
+    {
+        if (Time.time < NextHitAllowedTime) return false;
 
-	public bool TryPerformAction() {
-		if (Time.time < NextShotAllowedTime) return false;
+        var hit = false;
+        if (Physics.Raycast(new Ray(hitOriginPoint.position, hitOriginPoint.forward * hitDistance), out var hitInfo, hitDistance, hitMask))
+        {
+            var target = hitInfo.collider.GetComponentInParent<IHittable>();
+            target?.Hit(force * hitOriginPoint.forward, 2);
+            hit = target != null;
+        }
 
-		var hitTargets = Physics.OverlapSphereNonAlloc(hitPosition.position, hitRadius, HitColliderNonAlloc, hitMask);
+        NextHitAllowedTime = Time.time + cooldown;
+        OnActionTriggered.Invoke(hitAction);
+        return hit;
+    }
 
-		IHittable target = null;
-		for (var i = 0; target == null && i < hitTargets; ++i) {
-			target = HitColliderNonAlloc[i].GetComponentInParent<IHittable>();
-			if (transform.IsChildOf(target.transform)) target = default;
-		}
-		target?.Hit(force * hitPosition.forward, 2);
-		NextShotAllowedTime = Time.time + cooldown;
-		OnActionTriggered.Invoke(hitAction);
-		return target != null;
-	}
-
-	private void OnDrawGizmos() {
-		if (!hitPosition) return;
-		Gizmos.color = new Color(.4f, 0, 0);
-		Gizmos.DrawSphere(hitPosition.position, hitRadius);
-	}
+    private void OnDrawGizmos()
+    {
+        if (!hitOriginPoint) return;
+        Gizmos.color = new Color(.4f, 0, 0);
+        Gizmos.DrawLine(hitOriginPoint.position, hitOriginPoint.position + hitOriginPoint.forward * hitDistance);
+    }
 }

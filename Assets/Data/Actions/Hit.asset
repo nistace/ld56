@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66d69d308f5e4012bd1860ad9df7d963, type: 3}
   m_Name: Hit
   m_EditorClassIdentifier: 
-  animatorParameterName: ActionHit
+  animatorParameterName: Propel
