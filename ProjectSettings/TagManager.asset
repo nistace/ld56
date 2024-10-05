@@ -14,10 +14,10 @@ TagManager:
   - Creature
   - GroundChecker
   - AimCast
-  - 
-  - 
-  - 
-  - 
+  - ShieldCreature
+  - TriggerArea
+  - Shield
+  - BadGuy
   - 
   - 
   - 

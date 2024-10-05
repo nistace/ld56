@@ -1,29 +1,55 @@
-using System;
 using NiUtils.Extensions;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Serialization;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace LD56 {
-	public class CreatureController : MonoBehaviour {
+	public class CreatureController : MonoBehaviour, ICameraTarget, IPropelable {
 		[SerializeField] protected Transform selfTransform;
 		[SerializeField] protected float selfRotationSpeed = 8f;
+		[SerializeField] protected Transform bodyMid;
 		[SerializeField] protected new Rigidbody rigidbody;
 		[SerializeField] protected GroundChecker groundChecker;
-		[SerializeField] protected Transform armAimTarget;
+		[FormerlySerializedAs("armAimTarget")] [SerializeField] protected Transform arm;
 		[SerializeField] protected float armAimMovementSlerpFactor = 8f;
 		[SerializeField] protected float minAimTargetDistanceFromArm = 3;
 		[SerializeField] protected float movementSpeed = .3f;
 		[SerializeField] protected float jumpForce = 5;
 		[SerializeField] protected float inputImpactInAir = .5f;
+		[SerializeField] protected float cameraTargetPositionDistanceThreshold = 2;
+		[SerializeField] protected float cameraTargetPositionDistance = 5;
 
+		private IActionPerformer ActionPerformer { get; set; }
 		private Vector3 MovementInput { get; set; }
 		private Vector3 Movement { get; set; }
-		private Vector3 AimTarget { get; set; }
-		private float CurrentSelfRotationY { get; set; }
+		private Vector3 ArmToAimTarget { get; set; } = Vector3.right;
+		private float TargetSelfRotationY { get; set; } = 90;
+		private float CurrentSelfRotationY { get; set; } = 90;
+		private float KinematicForbiddenUntilTime { get; set; }
 
-		public bool IsActiveCreature { get; set; }
+		public Vector3 CameraTargetPosition {
+			get {
+				if (Mathf.Abs(ArmToAimTarget.x) < cameraTargetPositionDistanceThreshold) return transform.position.With(y: 0);
+				return transform.position.With(y: 0) + (ArmToAimTarget.x < 0 ? Vector3.left : Vector3.right) * cameraTargetPositionDistance;
+			}
+		}
+
+		private bool IsActiveCreature { get; set; }
+		public bool IsOnGround => groundChecker.IsOnGround;
+		public Vector3 Velocity => rigidbody.velocity;
+		public bool ArmMovementAllowed { get; set; } = true;
+		public UnityEvent<PerformAction> OnActionPerformed { get; } = new UnityEvent<PerformAction>();
+		public Transform BodyMid => bodyMid;
 
 		private void Start() {
+			ActionPerformer = arm.GetComponentInChildren<IActionPerformer>();
+			ActionPerformer?.OnActionTriggered.AddListenerOnce(OnActionPerformed.Invoke);
 			CurrentSelfRotationY = Vector3.SignedAngle(selfTransform.forward, Vector3.right, Vector3.up);
+		}
+
+		private void OnDestroy() {
+			ActionPerformer?.OnActionTriggered.RemoveListener(OnActionPerformed.Invoke);
 		}
 
 		public void Move(Vector2 input) {
@@ -32,33 +58,38 @@ namespace LD56 {
 		}
 
 		private void FixedUpdate() {
-			rigidbody.isKinematic = groundChecker.IsOnGround && !IsActiveCreature;
+			rigidbody.isKinematic = groundChecker.IsOnGround && !IsActiveCreature && Time.time > KinematicForbiddenUntilTime;
 
 			UpdateMovement();
 			UpdateAim();
 		}
 
 		private void UpdateAim() {
-			if (!IsActiveCreature) return;
+			if (IsActiveCreature && InputManager.Controls.Player.Aim.IsPressed()) {
+				var aimTarget = AimCastController.HitPoint;
+				var armPositionOnPlane = arm.position.With(z: 0);
+				var planeArmToAimTarget = aimTarget - armPositionOnPlane;
 
-			AimTarget = AimCastController.HitPoint;
-			var armPositionOnPlane = armAimTarget.position.With(z: 0);
-			var planeArmToAimTarget = AimTarget - armPositionOnPlane;
-			if (planeArmToAimTarget.sqrMagnitude < minAimTargetDistanceFromArm * minAimTargetDistanceFromArm) {
-				AimTarget = armPositionOnPlane + planeArmToAimTarget.normalized * minAimTargetDistanceFromArm;
+				if ((AimCastController.HitPoint - selfTransform.position).x < 0) TargetSelfRotationY = 270;
+				else if ((AimCastController.HitPoint - selfTransform.position).x > 0) TargetSelfRotationY = 90;
+
+				if (planeArmToAimTarget.sqrMagnitude < minAimTargetDistanceFromArm * minAimTargetDistanceFromArm) {
+					aimTarget = armPositionOnPlane + planeArmToAimTarget.normalized * minAimTargetDistanceFromArm;
+				}
+
+				ArmToAimTarget = aimTarget - arm.position;
 			}
 
-			var armToAimTarget = AimTarget - armAimTarget.position;
-
-			var upVector = Vector3.Cross(Vector3.forward, armToAimTarget);
-			if (Vector3.Angle(upVector, Vector3.up) > 90) upVector = -upVector;
-
-			var targetRotation = Quaternion.LookRotation(armToAimTarget, upVector);
-			armAimTarget.rotation = Quaternion.Slerp(armAimTarget.rotation, targetRotation, armAimMovementSlerpFactor * Time.deltaTime);
-
-			var targetSelfRotationY = AimTarget.x < selfTransform.position.x ? 270 : 90;
-			CurrentSelfRotationY = Mathf.MoveTowards(CurrentSelfRotationY, targetSelfRotationY, selfRotationSpeed * Time.deltaTime);
+			CurrentSelfRotationY = Mathf.MoveTowards(CurrentSelfRotationY, TargetSelfRotationY, selfRotationSpeed * Time.deltaTime);
 			selfTransform.rotation = Quaternion.Euler(0, CurrentSelfRotationY, 0);
+
+			if (ArmMovementAllowed && Mathf.Approximately(CurrentSelfRotationY, TargetSelfRotationY)) {
+				var upVector = Vector3.Cross(Vector3.forward, ArmToAimTarget);
+				if (Vector3.Angle(upVector, Vector3.up) > 90) upVector = -upVector;
+
+				var targetArmRotation = Quaternion.LookRotation(ArmToAimTarget, upVector);
+				arm.rotation = Quaternion.Slerp(arm.rotation, targetArmRotation, armAimMovementSlerpFactor * Time.deltaTime);
+			}
 		}
 
 		private void UpdateMovement() {
@@ -69,7 +100,9 @@ namespace LD56 {
 				Movement = Vector3.Lerp(Movement, IsActiveCreature ? MovementInput : Vector3.zero, inputImpactInAir * Time.deltaTime);
 			}
 
-			rigidbody.MovePosition(transform.position + Movement * (movementSpeed * Time.fixedDeltaTime));
+			if (IsActiveCreature) {
+				rigidbody.velocity = rigidbody.velocity.With(x: Movement.x * movementSpeed);
+			}
 		}
 
 		public void Jump() {
@@ -79,10 +112,16 @@ namespace LD56 {
 			rigidbody.AddForce(Vector3.up * jumpForce);
 		}
 
-		private void OnDrawGizmos() {
-			if (!IsActiveCreature) return;
-			Gizmos.color = Color.green;
-			Gizmos.DrawSphere(AimTarget, .5f);
+		public void PerformAction() => ActionPerformer?.TryPerformAction();
+
+		public void Propel(Vector3 force, float kinematicForbiddenUntilTime) {
+			rigidbody.isKinematic = false;
+			rigidbody.AddForce(force);
+			KinematicForbiddenUntilTime = Mathf.Max(KinematicForbiddenUntilTime, kinematicForbiddenUntilTime);
+		}
+
+		public void SetCreatureAsActive(bool active) {
+			IsActiveCreature = active;
 		}
 	}
 }

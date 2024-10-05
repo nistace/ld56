@@ -7,7 +7,9 @@ namespace LD56 {
 		public static GameData Data { get; set; }
 
 		[SerializeField] protected CreatureController[] playerCreatures;
+		[SerializeField] protected GameplayCameraController camera;
 
 		public CreatureController[] PlayerCreatures => playerCreatures;
+		public GameplayCameraController Camera => camera;
 	}
 }

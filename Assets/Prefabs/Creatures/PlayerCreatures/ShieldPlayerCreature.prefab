@@ -12,10 +12,20 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: -0.83
       objectReference: {fileID: 0}
+    - target: {fileID: 1306675425150185620, guid: c9059a04d2e005542b66a9c5a8192a5f,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2236927972019434310, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
       propertyPath: m_Name
       value: ShieldPlayerCreature
+      objectReference: {fileID: 0}
+    - target: {fileID: 2236927972019434310, guid: c9059a04d2e005542b66a9c5a8192a5f,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2236927972019434311, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
@@ -95,27 +105,27 @@ PrefabInstance:
     - target: {fileID: 2236927973710504662, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.70744514
+      value: 0.92387956
       objectReference: {fileID: 0}
     - target: {fileID: 2236927973710504662, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.7067683
+      value: -0.38268343
       objectReference: {fileID: 0}
     - target: {fileID: 2236927973710504662, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2236927973710504662, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.00000017881392
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2236927973710504662, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -89.948
+      value: -45
       objectReference: {fileID: 0}
     - target: {fileID: 2236927973710504662, guid: c9059a04d2e005542b66a9c5a8192a5f,
         type: 3}
@@ -127,6 +137,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4649987700031576103, guid: c9059a04d2e005542b66a9c5a8192a5f,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 5f784cfdf73588b43a7d402b05c565cc, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c9059a04d2e005542b66a9c5a8192a5f, type: 3}
 --- !u!4 &1608218172081416801 stripped
@@ -142,10 +157,40 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1608218172081416801}
     m_Modifications:
+    - target: {fileID: 1660992461057063084, guid: 5fda79b35719d8744afc33bd54136a3b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4682622594120726730, guid: 5fda79b35719d8744afc33bd54136a3b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274780481344848495, guid: 5fda79b35719d8744afc33bd54136a3b,
+        type: 3}
+      propertyPath: cooldown
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274780481344848495, guid: 5fda79b35719d8744afc33bd54136a3b,
+        type: 3}
+      propertyPath: propelablesKinematicForbiddenDelay
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7382320726738131822, guid: 5fda79b35719d8744afc33bd54136a3b,
         type: 3}
       propertyPath: m_Name
       value: Shield
+      objectReference: {fileID: 0}
+    - target: {fileID: 7382320726738131822, guid: 5fda79b35719d8744afc33bd54136a3b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7767217744167510085, guid: 5fda79b35719d8744afc33bd54136a3b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8997947807583801335, guid: 5fda79b35719d8744afc33bd54136a3b,
         type: 3}

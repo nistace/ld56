@@ -64,6 +64,15 @@ namespace LD56
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Aim"",
+                    ""type"": ""Button"",
+                    ""id"": ""7bf85956-d1bf-484b-bc78-5b72709ec794"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -154,6 +163,17 @@ namespace LD56
                     ""action"": ""SwapCharacter"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aee59bd0-6ec5-49f7-a1a9-988dd65e08b5"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Aim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -166,6 +186,7 @@ namespace LD56
             m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
             m_Player_Action = m_Player.FindAction("Action", throwIfNotFound: true);
             m_Player_SwapCharacter = m_Player.FindAction("SwapCharacter", throwIfNotFound: true);
+            m_Player_Aim = m_Player.FindAction("Aim", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -231,6 +252,7 @@ namespace LD56
         private readonly InputAction m_Player_Jump;
         private readonly InputAction m_Player_Action;
         private readonly InputAction m_Player_SwapCharacter;
+        private readonly InputAction m_Player_Aim;
         public struct PlayerActions
         {
             private @Controls m_Wrapper;
@@ -239,6 +261,7 @@ namespace LD56
             public InputAction @Jump => m_Wrapper.m_Player_Jump;
             public InputAction @Action => m_Wrapper.m_Player_Action;
             public InputAction @SwapCharacter => m_Wrapper.m_Player_SwapCharacter;
+            public InputAction @Aim => m_Wrapper.m_Player_Aim;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -260,6 +283,9 @@ namespace LD56
                 @SwapCharacter.started += instance.OnSwapCharacter;
                 @SwapCharacter.performed += instance.OnSwapCharacter;
                 @SwapCharacter.canceled += instance.OnSwapCharacter;
+                @Aim.started += instance.OnAim;
+                @Aim.performed += instance.OnAim;
+                @Aim.canceled += instance.OnAim;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -276,6 +302,9 @@ namespace LD56
                 @SwapCharacter.started -= instance.OnSwapCharacter;
                 @SwapCharacter.performed -= instance.OnSwapCharacter;
                 @SwapCharacter.canceled -= instance.OnSwapCharacter;
+                @Aim.started -= instance.OnAim;
+                @Aim.performed -= instance.OnAim;
+                @Aim.canceled -= instance.OnAim;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -299,6 +328,7 @@ namespace LD56
             void OnJump(InputAction.CallbackContext context);
             void OnAction(InputAction.CallbackContext context);
             void OnSwapCharacter(InputAction.CallbackContext context);
+            void OnAim(InputAction.CallbackContext context);
         }
     }
 }

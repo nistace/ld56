@@ -11,18 +11,21 @@ namespace LD56 {
 
 		private GameplayState() {
 			InputManager.Controls.Player.Jump.AddPerformListenerOnce(HandleJumpPerformed);
+			InputManager.Controls.Player.Action.AddPerformListenerOnce(HandleActionPerformed);
 			InputManager.Controls.Player.SwapCharacter.AddPerformListenerOnce(HandleSwapCharacterPerformed);
 		}
 
 		private void HandleSwapCharacterPerformed(InputAction.CallbackContext obj) => ChangeCreatureControl((CurrentCreatureIndex + 1).PosMod(GameData.Data.PlayerCreatures.Length));
 
 		private void ChangeCreatureControl(int index) {
-			CurrentCreature.IsActiveCreature = false;
+			CurrentCreature.SetCreatureAsActive(false);
 			CurrentCreatureIndex = index.PosMod(GameData.Data.PlayerCreatures.Length);
-			CurrentCreature.IsActiveCreature = true;
+			CurrentCreature.SetCreatureAsActive(true);
+			GameData.Data.Camera.Target = CurrentCreature;
 		}
 
 		private void HandleJumpPerformed(InputAction.CallbackContext obj) => CurrentCreature.Jump();
+		private void HandleActionPerformed(InputAction.CallbackContext obj) => CurrentCreature.PerformAction();
 
 		public void Enable() {
 			ChangeCreatureControl(0);
